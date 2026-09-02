@@ -55,7 +55,8 @@ export class Auth0DeviceFlow {
    */
   async startDeviceFlow(): Promise<VerificationInfo> {
     const response = await fetch('/api/auth/device/code', {
-      method: 'POST'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
     });
 
     if (!response.ok) {
@@ -63,6 +64,7 @@ export class Auth0DeviceFlow {
     }
 
     const data = await response.json();
+
     return {
       deviceCode: data.device_code,
       userCode: data.user_code,
