@@ -6,16 +6,18 @@ import { NextResponse } from 'next/server';
  */
 export async function POST() {
   try {
+    const deviceCodeRequest = {
+      client_id: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
+      audience: process.env.NEXT_PUBLIC_FULCRA_API_ENDPOINT,
+      scope: 'openid profile email offline_access'
+    };
+
     const response = await fetch(
       `https://${process.env.NEXT_PUBLIC_AUTH0_DOMAIN}/oauth/device/code`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID,
-          audience: process.env.NEXT_PUBLIC_FULCRA_API_ENDPOINT,
-          scope: 'openid profile email offline_access'
-        })
+        body: JSON.stringify(deviceCodeRequest)
       }
     );
 

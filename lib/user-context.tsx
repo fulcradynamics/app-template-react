@@ -48,6 +48,35 @@ function persist(state: UserState) {
   );
 }
 
+/**
+ * End the Auth0 SSO session by loading its /v2/logout endpoint in a hidden
+ * iframe (no popup, no visible UI). Used both before login (to force the user to
+ * actively authenticate instead of silently reusing an SSO session) and on
+ * logout. We deliberately omit `returnTo` so Auth0 does NOT require the URL to
+ * be in the app's "Allowed Logout URLs". Resolves after a short delay to give
+ * the request a moment to clear the session.
+ */
+function clearAuth0Session(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    const logoutUrl = `https://${process.env.NEXT_PUBLIC_AUTH0_DOMAIN}/v2/logout`;
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = logoutUrl;
+    document.body.appendChild(iframe);
+
+    // Give it a moment to complete, then remove the iframe
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      resolve();
+    }, 1000);
+  });
+}
+
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -68,26 +97,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [setAndPersist]);
 
   /**
-   * Grab user info from Auth0 (client-side) & the Fulcra API (via server route).
+   * Grab user info from Auth0 & the Fulcra API via server routes. Both read the
+   * HTTP-only cookie server-side, so this works even after a reload when the
+   * in-memory token is gone.
    */
   const getUser = useCallback(async () => {
-    const auth0 = auth0Ref.current!;
-    const userInfo = await auth0.getUser();
-
-    // Call server route instead of the Fulcra API directly
-    const response = await fetch('/api/user/info');
-    if (!response.ok) {
-      throw new Error('Failed to fetch user info');
+    // Get Auth0 user info from server (uses HTTP-only cookie)
+    const auth0Response = await fetch('/api/auth/user');
+    if (!auth0Response.ok) {
+      throw new Error('Failed to fetch Auth0 user info');
     }
-    const fulcraUserInfo = await response.json();
+    const userInfo = await auth0Response.json();
+
+    // Get Fulcra user info from server (uses HTTP-only cookie)
+    const fulcraResponse = await fetch('/api/user/info');
+    if (!fulcraResponse.ok) {
+      throw new Error('Failed to fetch Fulcra user info');
+    }
+    const fulcraUserInfo = await fulcraResponse.json();
 
     setAndPersist({ auth0UserInfo: userInfo, fulcraUserInfo });
   }, [setAndPersist]);
 
   /**
-   * Initializes a user session; sets up the Auth0 device-flow client. Because the
-   * in-memory token is gone on a fresh load, this clears any stale persisted user
-   * info (matching the Svelte template's behavior).
+   * Initializes a user session; sets up the Auth0 device-flow client and restores
+   * the session from the HTTP-only access-token cookie when one is present.
    */
   const init = useCallback(async () => {
     if (initialized.current) return;
@@ -99,14 +133,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
       audience: process.env.NEXT_PUBLIC_FULCRA_API_ENDPOINT!
     });
 
-    // No in-memory session on a fresh load → clear any persisted user info.
-    if (!(await auth0Ref.current.isAuthenticated())) {
+    // Check if we have a valid access token cookie (server-side check)
+    try {
+      const response = await fetch('/api/auth/check');
+      const { authenticated } = await response.json();
+
+      if (authenticated) {
+        // We have a valid cookie, restore the user session
+        await getUser();
+      } else {
+        // No valid session, clear persisted user info
+        clearUser();
+      }
+    } catch (error) {
+      console.error('Failed to check auth status:', error);
       clearUser();
     }
-  }, [clearUser]);
+  }, [clearUser, getUser]);
 
   const startLogin = useCallback(async () => {
     try {
+      // FIRST: clear any existing Auth0 SSO session so the user must actively
+      // authenticate (no silent SSO reuse; forces account selection).
+      await clearAuth0Session();
+
+      // NOW start the device flow - user will need to actively authenticate
       return await auth0Ref.current!.startDeviceFlow();
     } catch (error) {
       console.error('Failed to start device flow:', error);
@@ -167,19 +218,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Finally, end the Auth0 SSO session itself. Without it the next sign-in
     // could silently reuse the still-active session. This must run in a browser
     // context (the SSO cookie is first-party to the Auth0 domain and can't be
-    // cleared server-side). We deliberately omit `returnTo` so Auth0 does NOT
-    // require the URL to be in the app's "Allowed Logout URLs" — the tradeoff
-    // is that the popup briefly shows Auth0's default page, so we just close it
-    // on a short timer once the request has had a moment to clear the session.
-    if (typeof window !== 'undefined') {
-      const logoutUrl = `https://${process.env.NEXT_PUBLIC_AUTH0_DOMAIN}/v2/logout`;
-      const popup = window.open(logoutUrl, 'auth0-logout', 'width=500,height=600,left=100,top=100');
-      if (popup) {
-        setTimeout(() => {
-          if (!popup.closed) popup.close();
-        }, 2000);
-      }
-    }
+    // cleared server-side). We use a hidden iframe (no popup, no visible UI).
+    void clearAuth0Session();
   }, [clearUser]);
 
   const value = useMemo<UserContextValue>(
