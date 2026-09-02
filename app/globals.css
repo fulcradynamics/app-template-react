@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+@plugin 'daisyui';
+
+:root {
+  --color-fulcra-black: #16161d;
+  --color-fulcra-black-75: #16161d;
+  --color-fulcra-black-50: #222227;
+  --color-fulcra-black-20: #38383a;
+  --color-fulcra-black-25: #333333;
+  --color-fulcra-gray: #8a8a8e;
+  --color-fulcra-white: #ffffff;
+  --color-fulcra-teal-100: #56d6b7;
+  --color-fulcra-teal-50: #abebdb;
+  --color-fulcra-teal-10: #ecf7f3;
+  --color-fulcra-green-100: #36766a;
+  --color-fulcra-green-75: #34c759;
+  --color-fulcra-lavender-100: #7b61ff;
+  --color-fulcra-lavender-75: #9c88ff;
+  --color-fulcra-lavender-50: #bdb0ff;
+  --color-fulcra-lavender-25: #ded7ff;
+  --color-fulcra-purple-100: #2b2b69;
+  --color-fulcra-error: #ff3b30;
+  --color-fulcra-teal: #56d6b7;
+  --color-fulcra-purple: #7b61ff;
+  --color-fulcra-green: #34c759;
+  --color-fulcra-blue: #007aff;
+  --color-fulcra-yellow: #ffcc00;
+  --color-fulcra-red: #ff3b30;
+  --color-fulcra-orange: #ff9500;
+}
+
+@theme {
+  --color-fulcra-black: #16161d;
+  --color-fulcra-black-75: #16161d;
+  --color-fulcra-black-50: #222227;
+  --color-fulcra-black-20: #38383a;
+  --color-fulcra-black-25: #333333;
+  --color-fulcra-gray: #8a8a8e;
+  --color-fulcra-white: #ffffff;
+  --color-fulcra-teal-100: #56d6b7;
+  --color-fulcra-teal-50: #abebdb;
+  --color-fulcra-teal-10: #ecf7f3;
+  --color-fulcra-green-100: #36766a;
+  --color-fulcra-green-75: #34c759;
+  --color-fulcra-lavender-100: #7b61ff;
+  --color-fulcra-lavender-75: #9c88ff;
+  --color-fulcra-lavender-50: #bdb0ff;
+  --color-fulcra-lavender-25: #ded7ff;
+  --color-fulcra-purple-100: #2b2b69;
+  --color-fulcra-error: #ff3b30;
+  --color-fulcra-teal: #56d6b7;
+  --color-fulcra-purple: #7b61ff;
+  --color-fulcra-green: #34c759;
+  --color-fulcra-blue: #007aff;
+  --color-fulcra-yellow: #ffcc00;
+  --color-fulcra-red: #ff3b30;
+  --color-fulcra-orange: #ff9500;
+
+  --font-sans: var(--font-rubik);
+  --font-serif: var(--font-rubik);
+}
+
+@plugin 'daisyui/theme' {
+  name: 'dark';
+  prefersdark: true;
+  default: true;
+  color-scheme: dark;
+
+  --color-primary: var(--color-fulcra-teal);
+  --color-secondary: var(--color-fulcra-gray);
+}
