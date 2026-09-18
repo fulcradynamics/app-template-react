@@ -15,14 +15,17 @@ export async function POST(request: Request) {
   // Store token in HTTP-only cookie (more secure than localStorage)
   // Security settings ensure cookie is only accessible from this domain:
   // - httpOnly: JavaScript cannot access the cookie (XSS protection)
-  // - secure: Only sent over HTTPS (localhost is exempt in dev)
-  // - sameSite: 'strict': Cookie only sent to same domain, not cross-site
+  // - secure: Only sent over HTTPS in production. Off in dev because Safari
+  //   refuses to store a Secure cookie over plain http://localhost, which would
+  //   silently drop the session during local development.
+  // - sameSite: 'lax': all auth calls are same-origin fetches, so lax is
+  //   sufficient and avoids Safari's stricter handling of 'strict' cookies.
   // - path: '/': Available to all routes on this domain only
   const cookieStore = await cookies();
   cookieStore.set('fulcra_access_token', accessToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 60 * 60 * 24, // 24 hours
     path: '/'
   });
