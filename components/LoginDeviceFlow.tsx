@@ -73,18 +73,6 @@ export default function LoginDeviceFlow() {
               your logo
             </span>
           </div>
-          <span className="text-[11px] leading-none tracking-[0.06em] text-fulcra-gray uppercase">
-            powered by
-          </span>
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/app-icon_152.png"
-              alt="Fulcra"
-              className="block h-[26px] w-[26px] rounded-md"
-            />
-            <span className="text-[13.5px] font-medium tracking-[0.01em]">Fulcra</span>
-          </div>
         </div>
         <div className="flex items-center gap-5 text-[13px]">
           <a

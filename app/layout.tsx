@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Rubik } from 'next/font/google';
 import { UserProvider } from '@/lib/user-context';
+import FulcraBranding from '@/components/FulcraBranding';
 
 const rubik = Rubik({
   subsets: ['latin'],
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={rubik.variable}>
       <body>
+        <FulcraBranding />
         <UserProvider>
           <div className="flex h-full min-h-screen w-full flex-col p-3">{children}</div>
         </UserProvider>
