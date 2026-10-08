@@ -3,15 +3,10 @@
 import { useState } from 'react';
 import { useUser } from '@/lib/user-context';
 import type { VerificationInfo } from '@/lib/auth0-device-flow';
+import { appConfig, type AppConfig } from '@/lib/app-config';
 
-// ---- fill these in for your app ----
-const appName = 'Your App Name';
-const tagline = "One line on what your app does with a person's Fulcra data.";
-const description =
-  'A starter template you can clone and build on. Sign-in and user accounts work from the first commit — replace this copy with your own and start shipping.';
-const showSlots = true; // set false once you've replaced the placeholders
-
-export default function LoginDeviceFlow() {
+export default function LoginDeviceFlow({ branding }: { branding?: Partial<AppConfig> } = {}) {
+  const { appName, tagline, description, showSlots, logoSrc } = { ...appConfig, ...branding };
   const user = useUser();
 
   const [verificationInfo, setVerificationInfo] = useState<VerificationInfo | null>(null);
@@ -67,12 +62,16 @@ export default function LoginDeviceFlow() {
 
       <header className="sticky top-0 z-20 flex flex-none items-center justify-between gap-6 bg-fulcra-black/70 px-7 py-5 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          {/* replace this slot with <img src="/your-logo.svg" alt={appName} className="h-[30px]" /> */}
-          <div className="grid h-[30px] min-w-[86px] place-items-center rounded-[7px] border border-dashed border-[#3d3d44] bg-[repeating-linear-gradient(135deg,#ffffff08_0_6px,transparent_6px_12px)] px-3">
-            <span className="font-mono text-[9.5px] tracking-[0.09em] text-fulcra-gray uppercase">
-              your logo
-            </span>
-          </div>
+          {logoSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoSrc} alt={appName} className="h-[30px]" />
+          ) : showSlots ? (
+            <div className="grid h-[30px] min-w-[86px] place-items-center rounded-[7px] border border-dashed border-[#3d3d44] bg-[repeating-linear-gradient(135deg,#ffffff08_0_6px,transparent_6px_12px)] px-3">
+              <span className="font-mono text-[9.5px] tracking-[0.09em] text-fulcra-gray uppercase">
+                your logo
+              </span>
+            </div>
+          ) : null}
           <span className="text-[11px] leading-none tracking-[0.06em] text-fulcra-gray uppercase">
             powered by
           </span>

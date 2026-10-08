@@ -80,6 +80,23 @@ vercel deploy                # preview deploy
 vercel deploy --prod         # production deploy
 ```
 
+## Customizing your app
+
+- Set login branding in `lib/app-config.ts`: `appName`, `tagline`, `description`,
+  `showSlots`, and optional `logoSrc` (for example `/your-logo.svg` in `public/`).
+  Set `showSlots` to `false` to hide template placeholders. `LoginDeviceFlow` also
+  accepts an optional partial `branding` prop; omitted fields use the config.
+- Build your feature UI in `app/page.tsx`. It can use `useUser()` and call
+  `user.logout()` directly, but should not initialize sessions or render login.
+- Keep authentication plumbing separate from customization: `AuthGate` in the root
+  layout, under `UserProvider`, waits for server session restoration before mounting
+  either login or feature children. Leave the gate, login handlers, user/session
+  implementation, and server authorization/API routes unchanged when branding the app.
+  This client gate only delays client rendering/mounting: it does not authorize
+  requests or stop server-component children from executing. Protected data fetched
+  by server components requires server-side authentication and authorization,
+  independently of the gate. Server routes must also enforce authorization.
+
 ## Authentication
 
 This template includes Auth0 authentication out of the box, using the **Auth0 Device Authorization Flow** with server-side API proxying:
@@ -118,15 +135,17 @@ See the [Fulcra REST API documentation](https://docs.fulcradynamics.com/rest-api
 
 ```
 app/
-├── layout.tsx                      # Root layout (fonts, UserProvider)
-├── page.tsx                        # Home page (login vs. dashboard)
+├── layout.tsx                      # Root layout (fonts, UserProvider, AuthGate)
+├── page.tsx                        # Editable feature UI
 ├── globals.css                     # Global styles with Fulcra colors
 └── api/                            # Route Handlers (auth + API proxy)
     ├── auth/                       # device/code, device/token, token, revoke
     └── user/                       # info, preferences
 components/
+├── AuthGate.tsx                    # Session restoration and login boundary
 └── LoginDeviceFlow.tsx             # Login screen
 lib/
+├── app-config.ts                   # Editable login branding
 ├── auth0-device-flow.ts            # Auth0 device authorization flow client
 ├── user-context.tsx               # User/auth context (login, logout, session)
 └── api-client.ts                   # FulcraAPI class for calling the Fulcra API

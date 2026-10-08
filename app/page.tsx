@@ -1,19 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '@/lib/user-context';
-import LoginDeviceFlow from '@/components/LoginDeviceFlow';
 
 export default function Home() {
   const user = useUser();
   const [preferences, setPreferences] = useState<{ timezone?: string } | null>(null);
   const [loadingPreferences, setLoadingPreferences] = useState(false);
-
-  useEffect(() => {
-    user.init();
-    // Run once on mount; init() is internally guarded against re-runs.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   async function fetchPreferences() {
     setLoadingPreferences(true);
@@ -29,10 +22,6 @@ export default function Home() {
     } finally {
       setLoadingPreferences(false);
     }
-  }
-
-  if (!user.authenticated) {
-    return <LoginDeviceFlow />;
   }
 
   return (
