@@ -1,5 +1,7 @@
 # Fulcra App Template - React
 
+> **Deprecated:** This template is no longer maintained or supported by the Build and Deploy a Web App skill. Use the maintained [SvelteKit template](https://github.com/fulcradynamics/app-template-svelte) for new apps. The existing React code and setup instructions remain available for reference.
+
 A Next.js web application template for building on the Fulcra platform. This template includes:
 
 - **Next.js** (App Router) with React 19
@@ -8,8 +10,6 @@ A Next.js web application template for building on the Fulcra platform. This tem
 - **Fulcra brand colors** and styling
 - **ESLint** and **Prettier** configured
 - **Vitest** for testing
-
-> Prefer Svelte? There is a functionally identical [SvelteKit version](https://github.com/fulcradynamics/app-template-svelte).
 
 ## Getting Started
 
